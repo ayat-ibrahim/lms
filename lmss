@@ -1,1 +1,60 @@
 
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local LMSMusicAssetID = "rbxassetid://74035998235880" -- Your music asset ID
+local musicVolume = 3
+
+local LMSMusicEnabled = false
+local soundInstance
+
+local function IsLastManStanding()
+    local survivors = Workspace.Players.Survivors:GetChildren()
+    return #survivors == 1 and survivors[1] == Players.LocalPlayer.Character
+end
+
+local function PlayLMSMusic()
+    if soundInstance then
+        soundInstance:Destroy()
+    end
+
+    if LMSMusicEnabled then
+        soundInstance = Instance.new("Sound")
+        soundInstance.SoundId = LMSMusicAssetID
+        soundInstance.Volume = musicVolume
+        soundInstance.Looped = false
+        soundInstance.Parent = Workspace
+        soundInstance:Play()
+    end
+end
+
+Workspace.Players.Survivors.ChildRemoved:Connect(function()
+    task.wait(1)
+    if LMSMusicEnabled and IsLastManStanding() then
+        PlayLMSMusic()
+        print("You are the Last Man Standing! Playing LMS music.")
+    end
+end)
+
+-- Create UI Window
+local Window = Rayfield:CreateWindow({
+    Name = "LMS Music Toggle",
+    LoadingTitle = "Loading LMS Music Script",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil,
+        FileName = "LMSMusicConfig"
+    },
+})
+
+local MainTab = Window:CreateTab("Main")
+
+MainTab:CreateToggle({
+    Name = "Enable LMS Music",
+    CurrentValue = false,
+    Flag = "EnableLMSMusic",
+    Callback = function(value)
+        LMSMusicEnabled = value
+        print("LMS Music Enabled:", value)
+    end,
+})
